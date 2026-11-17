@@ -20,7 +20,7 @@ import 'game_provider.dart';
 /// - each tap adds 1 to the score and plays a sound effect.
 ///
 
-class OverlayTutorial extends FlameGame with TapCallbacks, HasCollisionDetection {
+class OverlayTutorial extends FlameGame with TapCallbacks, HasCollisionDetection, WidgetsBindingObserver {
   final BuildContext context;
   late final GameProvider gameProvider;  // Add this
 
@@ -28,6 +28,18 @@ class OverlayTutorial extends FlameGame with TapCallbacks, HasCollisionDetection
 
   @override
   Color backgroundColor() => const Color.fromARGB(249, 120, 86, 233);
+
+  @override void onAttach() {
+    // TODO: implement onAttach
+    super.onAttach();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    print(State);
+  }
 
   @override
   Future<void> onLoad() async {

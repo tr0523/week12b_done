@@ -8,6 +8,7 @@ import 'overlay_main.dart';
 import 'overlay_pause.dart';
 import 'overlay_info.dart';
 import 'overlay_settings.dart';
+import 'highscores_page.dart';
 
 import 'package:provider/provider.dart';
 import 'game_provider.dart';
@@ -22,26 +23,80 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget{
   const MainApp({super.key});
+}
+
+class _MainAppState extends State<MainApp> {
+
+  int _currentNavScreen = 0;
+
+  final List<Widget> _bottomNavScreens = [
+    const MainGame(),
+    const HighscoresPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: GameWidget(
-          game: OverlayTutorial(context)..paused = true,
-          overlayBuilderMap: {
-            'title': (context, game) => OverlayTitle(game: game),
-            'main': (context, game) => mainOverlay(context, game),
-            'pause': (context, game) => pauseOverlay(context, game),
-            'info': (context, game) => InfoOverlay(game: game as OverlayTutorial),
-            'settings':(context, game) => settingsOverlay(context,game),
+        appBar: AppBar(
+          title:Text("Cool Space Game"),
+        ),
+        //body: _bottomNavScreens[_currentNavScreen],
+        body: IndexedStack(
+          index: _currentNavScreen,
+          children: _bottomNavScreens,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Game" 
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.score),
+              label: "High Scores" 
+            ),
+          ] ,
+          onTap: (value) {
+            final gameProvider = context.read<GameProvider>();
+
+            setState(() {
+              _currentNavScreen = value;
+              gameProvider.game?.paused = true;
+              gameProvider.game?.overlays.add('pause');
+            });
           },
-          initialActiveOverlays: const ['title'],
         ),
       ),
+    );
+  }
+}
+
+class MainGame extends StatelessWidget {
+  const MainGame({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    final gameProvider = context.read<GameProvider>();
+    final game = OverlayTutorial(context)..paused = true;
+    gameProvider.game = game;
+
+    return GameWidget(
+      game: game,
+      overlayBuilderMap: {
+        'title': (context, game) => OverlayTitle(game: game),
+        'main': (context, game) => mainOverlay(context, game),
+        'pause': (context, game) => pauseOverlay(context, game),
+        'info': (context, game) => InfoOverlay(game: game as OverlayTutorial),
+        'settings':(context, game) => settingsOverlay(context,game),
+      },
+      initialActiveOverlays: const ['title'],
     );
   }
 }
